@@ -56,4 +56,40 @@ async def pitch(type: str):
 
 @app.get("/surrender")
 async def surrender():
-    return HTMLResponse("<h1>比賽結束！</h1><a href='/'>1.要，比下一場</a> <a href='/'>2.不玩了</a>")
+    return HTMLResponse("<h1>比賽結束！</h1><a href='/'>1.要，比下一場</a> <a href='/'>2.不玩了</a>")@app.get("/", response_class=HTMLResponse)
+async def index():
+    # 這是你的遊戲介面，加入 CSS 來處理背景與音效
+    return f"""
+    <html>
+    <head>
+        <style>
+            body {{
+                background: url('images.jpg') no-repeat center center fixed;
+                background-size: cover;
+                color: white;
+                text-align: center;
+                font-family: Arial, sans-serif;
+            }}
+            .container {{ background: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 15px; display: inline-block; }}
+            button {{ padding: 10px; margin: 5px; cursor: pointer; }}
+        </style>
+    </head>
+    <body>
+        <audio autoplay loop>
+            <source src="bgm.mp3" type="audio/mpeg">
+        </audio>
+        
+        <div class="container">
+            <h1>🏟️ 天母棒球場</h1>
+            <h2>中信兄弟 0 : 0 味全龍</h2>
+            <p>投手體力: 100 | 出局: 0 | 好球: 0 | 壞球: 0</p>
+            
+            <div style="max-width: 300px; margin: auto;">
+                {"".join([f'<button>{pitch}</button>' for pitch in ["直球", "曲球", "變化球", "滑球", "變速球", "速球", "伸卡球", "指岔球", "卡特球"]])}
+            </div>
+            
+            <br><a href="/surrender" style="color:red;">🏳️ 投降系統</a>
+        </div>
+    </body>
+    </html>
+    """
