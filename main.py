@@ -138,3 +138,24 @@ async def keep(): return RedirectResponse("/")
 
 @app.get("/quit")
 async def quit(): game.clear(); return RedirectResponse("/")    
+def render_ui(content, stop_music=False):
+    # 使用 ./ 強制指定根目錄路徑
+    music = '<audio id="bgm" autoplay loop><source src="./bgm.mp3" type="audio/mpeg"></audio>' if not stop_music else ""
+    return f"""
+    <html><head><style>
+        body {{ 
+            background-image: url('./images.jpg'); 
+            background-repeat: no-repeat; 
+            background-position: center center; 
+            background-attachment: fixed; 
+            background-size: cover; 
+            color: white; 
+            text-align: center; 
+            font-family: sans-serif; 
+        }}
+        .overlay {{ background: rgba(0,0,0,0.7); min-height: 100vh; padding: 20px; }}
+    </style></head>
+    <body onclick="document.getElementById('bgm').play();">
+        <div class="overlay">{music}{content}</div>
+    </body></html>
+    """
