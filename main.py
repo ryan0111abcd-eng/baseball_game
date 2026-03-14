@@ -31,16 +31,17 @@ def reset_game():
 
 # --- 網頁渲染 ---
 def render_ui(content, stop_music=False):
-    # 確保檔名為 bgm.mp3 與 images.jpg
     music_tag = '<audio id="bgm" autoplay loop><source src="bgm.mp3" type="audio/mpeg"></audio>' if not stop_music else ""
     return f"""
     <html><head><style>
-        body {{ background: url('images.jpg') no-repeat center center fixed; background-size: cover; color: white; font-family: sans-serif; text-align: center; margin-top: 50px; }}
-        button {{ padding: 12px; cursor: pointer; border-radius: 5px; border: none; background: #fff; font-weight: bold; margin: 5px; }}
+        body {{ background: url('images.jpg') no-repeat center center fixed; background-size: cover; color: black; font-family: sans-serif; text-align: center; margin-top: 50px; }}
+        /* 加入半透明白色遮罩，讓黑色字體在任何背景都清晰 */
+        .container {{ background: rgba(255, 255, 255, 0.7); padding: 20px; display: inline-block; border-radius: 20px; color: black; }}
+        button {{ padding: 12px; cursor: pointer; border-radius: 5px; border: 1px solid #333; background: #fff; font-weight: bold; margin: 5px; }}
     </style></head>
     <body onclick="document.getElementById('bgm').play();">
         {music_tag}
-        {content}
+        <div class="container">{content}</div>
     </body></html>
     """
 
@@ -49,23 +50,22 @@ async def index():
     if not game["active"]:
         reset_game()
         team_btns = "".join([f'<a href="/select?id={k}"><button>{v["name"]}</button></a>' for k,v in TEAMS.items()])
-        return render_ui(f"<h1>⚾ CPBL中華職棒傳奇 測試版</h1><div style='background:rgba(0,0,0,0.6); padding:20px;'>{team_btns}</div>")
+        # 標題設為黑色
+        return render_ui(f"<h1 style='color:black;'>⚾ CPBL中華職棒傳奇 測試版</h1><div>{team_btns}</div>")
 
     if game["is_over"]:
-        return render_ui(f"<div style='background:rgba(0,0,0,0.8); padding:30px;'><h1>比賽結束！</h1><h2>比分 {game['my_team']} {game['score'][0]} : {game['score'][1]} {game['opp_team']}</h2><a href='/quit'><button>返回選單</button></a></div>", stop_music=True)
+        return render_ui(f"<h1>比賽結束！</h1><h2>比分 {game['my_team']} {game['score'][0]} : {game['score'][1]} {game['opp_team']}</h2><a href='/quit'><button>返回選單</button></a>", stop_music=True)
 
-    stamina_html = f'<div style="background:red; padding:10px;">⚠️ 體力剩餘 {game["stamina"]}！<br><a href="/keep"><button>繼續投</button></a> <a href="/change"><button>換投</button></a></div>' if game["stamina"] < 50 else ""
+    stamina_html = f'<div style="background:rgba(255,0,0,0.2); padding:10px;">⚠️ 體力剩餘 {game["stamina"]}！<br><a href="/keep"><button>繼續投</button></a> <a href="/change"><button>換投</button></a></div>' if game["stamina"] < 50 else ""
     pitch_btns = "".join([f'<a href="/pitch?id={k}"><button>{v}</button></a>' for k,v in PITCH_TYPES.items()])
     
     content = f"""
-        <div style="background: rgba(0,0,0,0.7); padding: 20px; display: inline-block; border-radius: 20px;">
-            <h1>🏟️ {game['stadium']} (第 {game['inning']} 局)</h1>
-            <h2>{game['my_team']} {game['score'][0]} : {game['score'][1]} {game['opp_team']}</h2>
-            <p>投手: {game['pitcher']} (🔋{game['stamina']}) | 打者: {game['batter']}</p>
-            <p style="font-size: 1.5em;">🔴 OUT: {game['outs']} | S: {game['strikes']} | B: {game['balls']}</p>
-            <div style="border: 1px solid #555; padding: 10px; margin: 10px;">事件: {game['last_event']}</div>
-            <div>{pitch_btns}</div>{stamina_html}<br><a href="/surrender" style="color:red;">🏳️ 投降</a>
-        </div>
+        <h1>🏟️ {game['stadium']} (第 {game['inning']} 局)</h1>
+        <h2>{game['my_team']} {game['score'][0]} : {game['score'][1]} {game['opp_team']}</h2>
+        <p>投手: {game['pitcher']} (🔋{game['stamina']}) | 打者: {game['batter']}</p>
+        <p style="font-size: 1.5em; font-weight: bold;">🔴 OUT: {game['outs']} | S: {game['strikes']} | B: {game['balls']}</p>
+        <div style="border: 1px solid #333; padding: 10px; margin: 10px;">事件: {game['last_event']}</div>
+        <div>{pitch_btns}</div>{stamina_html}<br><a href="/surrender" style="color:red;">🏳️ 投降</a>
     """
     return render_ui(content)
 
